@@ -14,7 +14,7 @@ namespace ppt2pdf
             objWord.WindowState = Word.WdWindowState.wdWindowStateMinimize;
             convert2pdf(args[0], "*.doc?", (inputPath, outputPath) =>
             {
-                var wordDoc = objWord.Documents.Open(inputPath);
+                var wordDoc = objWord.Documents.Open(inputPath,ReadOnly: MsoTriState.msoTrue);
                 wordDoc.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF);
                 wordDoc.Close();
                 return true;
@@ -50,7 +50,7 @@ namespace ppt2pdf
             convert2pdf(args[0], "*.ppt?", (inputPath, outputPath) =>
             {
                 var pptDoc = objPowerPoint.Presentations.Open(inputPath, ReadOnly : MsoTriState.msoTrue);
-                pptDoc.ExportAsFixedFormat(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages);
+                pptDoc.ExportAsFixedFormat(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides : MsoTriState.msoTrue);
                 pptDoc.Close();
                 return true;
             });
