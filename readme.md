@@ -1,4 +1,4 @@
-# Utility to generate PDF files from PowerPoint and Word documents
+# Utility to generate PDF files from PowerPoint, Word and Excel documents
 
 ## Usage
 ```
