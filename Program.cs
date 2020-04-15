@@ -2,29 +2,68 @@
 using System.IO;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Word = Microsoft.Office.Interop.Word;
+using Excel = Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Core;
 
 namespace ppt2pdf
 {
     class Program
     {
-        static void doc2pdf(string[] args)
+        /// <summary>
+        /// Converts Excel documents to PDFs
+        /// </summary>
+        /// <param name="rootPath">The path of the directory that contains all Excel documents to be converted</param>
+        static void excel2pdf(string rootPath)
         {
-            var objWord = new Word.Application();
-            objWord.WindowState = Word.WdWindowState.wdWindowStateMinimize;
-            convert2pdf(args[0], "*.doc?", (inputPath, outputPath) =>
+            var objExcel = new Excel.Application(){
+                DisplayAlerts = false
+            };
+            convert2pdf(rootPath, "*.xls?", (inputPath, outputPath) =>
             {
-                var wordDoc = objWord.Documents.Open(inputPath,ReadOnly: MsoTriState.msoTrue);
-                wordDoc.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF);
-                wordDoc.Close();
+                var excelBook = objExcel.Workbooks.Open(inputPath, ReadOnly: MsoTriState.msoTrue);
+                excelBook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, outputPath);
+                excelBook.Close(SaveChanges:false);
                 return true;
             });
+            objExcel.Quit();
         }
+
+        /// <summary>
+        /// Converts Word documents to PDFs
+        /// </summary>
+        /// <param name="rootPath">The path of the directory that contains all Word documents to be converted</param>
+        static void doc2pdf(string rootPath)
+        {
+            var objWord = new Word.Application(){
+                DisplayAlerts = Word.WdAlertLevel.wdAlertsNone
+            };
+            objWord.WindowState = Word.WdWindowState.wdWindowStateMinimize;
+            convert2pdf(rootPath, "*.doc?", (inputPath, outputPath) =>
+            {
+                var wordDoc = objWord.Documents.Open(inputPath, ReadOnly: MsoTriState.msoTrue);
+                wordDoc.ExportAsFixedFormat(outputPath, Word.WdExportFormat.wdExportFormatPDF);
+                wordDoc.Close(SaveChanges:false);
+                return true;
+            });
+            objWord.Quit();
+        }
+
+        /// <summary>
+        /// Applies the function <param name="conv"/> for each file found under rootPath
+        /// </summary>
+        /// <param name="rootPath">The path of the directory that contains all office files</param>
+        /// <param name="pat">The pattern of the names of the files to be processed</param>
+        /// <param name="conv">The function that converts each office file to a pdf document</param>
         static void convert2pdf(string rootPath, string pat, Func<string, string, bool> conv)
         {
             foreach (var file in Directory.GetFiles(rootPath, pat, SearchOption.AllDirectories))
             {
-                if (file.Contains("reference")) continue;
+                // Skipping temporary files and the files under "reference" (sub-)directories
+                if (
+                    file.Contains("reference")
+                    || ((File.GetAttributes(file) & FileAttributes.Temporary) == FileAttributes.Temporary)
+                )
+                    continue;
                 var inputPath = Path.GetFullPath(file);
                 var dir_name = Path.GetDirectoryName(inputPath);
                 var file_name = Path.GetFileNameWithoutExtension(inputPath);
@@ -43,22 +82,33 @@ namespace ppt2pdf
                 }
             }
         }
-        static void ppt2pdf(string[] args)
+
+        /// <summary>
+        /// Converts PowerPoint documents to PDFs
+        /// </summary>
+        /// <param name="rootPath">The path of the directory that contains all PowerPoint documents to be converted</param>
+        static void ppt2pdf(string rootPath)
         {
-            var objPowerPoint = new PowerPoint.Application();
+            var objPowerPoint = new PowerPoint.Application(){
+                DisplayAlerts = PowerPoint.PpAlertLevel.ppAlertsNone
+            };
             objPowerPoint.WindowState = PowerPoint.PpWindowState.ppWindowMinimized;
-            convert2pdf(args[0], "*.ppt?", (inputPath, outputPath) =>
+            convert2pdf(rootPath, "*.ppt?", (inputPath, outputPath) =>
             {
-                var pptDoc = objPowerPoint.Presentations.Open(inputPath, ReadOnly : MsoTriState.msoTrue);
-                pptDoc.ExportAsFixedFormat(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides : MsoTriState.msoTrue);
+                var pptDoc = objPowerPoint.Presentations.Open(inputPath, ReadOnly: MsoTriState.msoTrue);
+                pptDoc.ExportAsFixedFormat(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides: MsoTriState.msoTrue);
                 pptDoc.Close();
                 return true;
             });
+            objPowerPoint.Quit();
         }
+
         static void Main(string[] args)
         {
-            ppt2pdf(args);
-            doc2pdf(args);
+            string rootPath = args[0];
+            ppt2pdf(rootPath);
+            doc2pdf(rootPath);
+            excel2pdf(rootPath);
         }
     }
 }
