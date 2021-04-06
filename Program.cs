@@ -96,7 +96,16 @@ namespace ppt2pdf
             convert2pdf(rootPath, "*.ppt?", (inputPath, outputPath) =>
             {
                 var pptDoc = objPowerPoint.Presentations.Open(inputPath, ReadOnly: MsoTriState.msoTrue);
-                pptDoc.ExportAsFixedFormat2(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides: MsoTriState.msoTrue);
+                pptDoc.ExportAsFixedFormat2(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, PowerPoint.PpFixedFormatIntent.ppFixedFormatIntentPrint, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides: MsoTriState.msoTrue);
+                /*
+                //Using printers to generate pdfs
+                pptDoc.PrintOptions.OutputType = PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages;
+                pptDoc.PrintOptions.PrintHiddenSlides = MsoTriState.msoTrue;
+                pptDoc.PrintOptions.HighQuality = MsoTriState.msoTrue;
+                pptDoc.PrintOptions.FitToPage = MsoTriState.msoTrue;
+                pptDoc.PrintOptions.FrameSlides = MsoTriState.msoTrue;
+                pptDoc.PrintOut(PrintToFile: outputPath);
+                */
                 pptDoc.Close();
                 return true;
             });
