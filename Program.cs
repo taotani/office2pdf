@@ -96,7 +96,7 @@ namespace ppt2pdf
             convert2pdf(rootPath, "*.ppt?", (inputPath, outputPath) =>
             {
                 var pptDoc = objPowerPoint.Presentations.Open(inputPath, ReadOnly: MsoTriState.msoTrue);
-                pptDoc.ExportAsFixedFormat2(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, PowerPoint.PpFixedFormatIntent.ppFixedFormatIntentPrint, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides: MsoTriState.msoTrue);
+                pptDoc.ExportAsFixedFormat2(outputPath, PowerPoint.PpFixedFormatType.ppFixedFormatTypePDF, PowerPoint.PpFixedFormatIntent.ppFixedFormatIntentPrint, OutputType: PowerPoint.PpPrintOutputType.ppPrintOutputNotesPages, PrintHiddenSlides: MsoTriState.msoTrue, UseISO19005_1: true);
                 //Using printers to generate pdfs
                 /*
                 pptDoc.PrintOptions.ActivePrinter = "Microsoft Print to PDF";
